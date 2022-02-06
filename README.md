@@ -55,7 +55,7 @@ for {
 
 - The Linux implementation is based on the epoll mechanism
 - The BSD and macOS implementation is based on the kqueue mechanism
-- The generic Unix implementation is based on the posix select syscall.
+- The generic Unix implementation is based on the posix select syscall
 
 ## Caution
 
