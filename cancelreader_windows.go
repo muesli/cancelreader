@@ -28,7 +28,7 @@ func NewReader(reader io.Reader) (CancelReader, error) {
 		return newFallbackCancelReader(reader)
 	}
 
-	// it is neccessary to open CONIN$ (NOT windows.STD_INPUT_HANDLE) in
+	// it is necessary to open CONIN$ (NOT windows.STD_INPUT_HANDLE) in
 	// overlapped mode to be able to use it with WaitForMultipleObjects.
 	conin, err := windows.CreateFile(
 		&(utf16.Encode([]rune("CONIN$\x00"))[0]), windows.GENERIC_READ|windows.GENERIC_WRITE,
@@ -158,7 +158,7 @@ func (r *winCancelReader) wait() error {
 	}
 }
 
-// readAsync is neccessary to read from a windows.Handle in overlapping mode.
+// readAsync is necessary to read from a windows.Handle in overlapping mode.
 func (r *winCancelReader) readAsync(data []byte) (int, error) {
 	hevent, err := windows.CreateEvent(nil, 0, 0, nil)
 	if err != nil {
@@ -205,7 +205,7 @@ func prepareConsole(input windows.Handle) (reset func() error, err error) {
 	newMode |= windows.ENABLE_INSERT_MODE
 	newMode |= windows.ENABLE_QUICK_EDIT_MODE
 
-	// Enabling virutal terminal input is necessary for processing certain
+	// Enabling virtual terminal input is necessary for processing certain
 	// types of input like X10 mouse events and arrows keys with the current
 	// bytes-based input reader. It does, however, prevent cancelReader from
 	// being able to cancel input. The planned solution for this is to read

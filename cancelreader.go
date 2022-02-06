@@ -9,7 +9,7 @@ import (
 // ErrCanceled gets returned when trying to read from a canceled reader.
 var ErrCanceled = fmt.Errorf("read canceled")
 
-// cancelReader is a io.Reader whose Read() calls can be canceled without data
+// CancelReader is a io.Reader whose Read() calls can be canceled without data
 // being consumed. The cancelReader has to be closed.
 type CancelReader interface {
 	io.ReadCloser
