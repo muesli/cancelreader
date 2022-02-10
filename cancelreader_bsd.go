@@ -13,14 +13,14 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-// NewReader returns a reader and a cancel function. If the input reader is an
-// *os.File, the cancel function can be used to interrupt a blocking read call.
+// NewReader returns a reader and a cancel function. If the input reader is a
+// File, the cancel function can be used to interrupt a blocking read call.
 // In this case, the cancel function returns true if the call was canceled
-// successfully. If the input reader is not an *os.File, the cancel function
+// successfully. If the input reader is not a File, the cancel function
 // does nothing and always returns false. The BSD and macOS implementation is
 // based on the kqueue mechanism.
 func NewReader(reader io.Reader) (CancelReader, error) {
-	file, ok := reader.(*os.File)
+	file, ok := reader.(File)
 	if !ok {
 		return newFallbackCancelReader(reader)
 	}
@@ -52,9 +52,9 @@ func NewReader(reader io.Reader) (CancelReader, error) {
 }
 
 type kqueueCancelReader struct {
-	file               *os.File
-	cancelSignalReader *os.File
-	cancelSignalWriter *os.File
+	file               File
+	cancelSignalReader File
+	cancelSignalWriter File
 	cancelMixin
 	kQueue       int
 	kQueueEvents [2]unix.Kevent_t

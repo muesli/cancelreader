@@ -14,14 +14,14 @@ import (
 )
 
 // newSelectCancelReader returns a reader and a cancel function. If the input
-// reader is an *os.File, the cancel function can be used to interrupt a
+// reader is a File, the cancel function can be used to interrupt a
 // blocking call read call. In this case, the cancel function returns true if
-// the call was canceled successfully. If the input reader is not a *os.File or
+// the call was canceled successfully. If the input reader is not a File or
 // the file descriptor is 1024 or larger, the cancel function does nothing and
 // always returns false. The generic unix implementation is based on the posix
 // select syscall.
 func newSelectCancelReader(reader io.Reader) (CancelReader, error) {
-	file, ok := reader.(*os.File)
+	file, ok := reader.(File)
 	if !ok || file.Fd() >= unix.FD_SETSIZE {
 		return newFallbackCancelReader(reader)
 	}
@@ -38,9 +38,9 @@ func newSelectCancelReader(reader io.Reader) (CancelReader, error) {
 }
 
 type selectCancelReader struct {
-	file               *os.File
-	cancelSignalReader *os.File
-	cancelSignalWriter *os.File
+	file               File
+	cancelSignalReader File
+	cancelSignalWriter File
 	cancelMixin
 }
 
@@ -101,7 +101,7 @@ func (r *selectCancelReader) Close() error {
 	return nil
 }
 
-func waitForRead(reader *os.File, abort *os.File) error {
+func waitForRead(reader, abort File) error {
 	readerFd := int(reader.Fd())
 	abortFd := int(abort.Fd())
 

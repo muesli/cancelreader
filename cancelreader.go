@@ -18,6 +18,17 @@ type CancelReader interface {
 	Cancel() bool
 }
 
+// File represents an input/output resource with a file descriptor.
+type File interface {
+	io.ReadWriteCloser
+
+	// Fd returns its file descriptor
+	Fd() uintptr
+
+	// Name returns its file name.
+	Name() string
+}
+
 // fallbackCancelReader implements cancelReader but does not actually support
 // cancelation during an ongoing Read() call. Thus, Cancel() always returns
 // false. However, after calling Cancel(), new Read() calls immediately return
