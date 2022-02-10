@@ -36,8 +36,7 @@ func TestReader(t *testing.T) {
 		n, err = cr.Read(p)
 	}()
 
-	ok := cr.Cancel()
-	if !ok {
+	if !cr.Cancel() {
 		t.Errorf("expected cancellation to be success")
 	}
 
@@ -77,8 +76,7 @@ func TestReaderNonFile(t *testing.T) {
 		t.Errorf("expected no error, but got %s", err)
 	}
 
-	ok := cr.Cancel()
-	if ok {
+	if cr.Cancel() {
 		t.Errorf("expected cancellation to be failure")
 	}
 }
