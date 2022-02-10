@@ -13,10 +13,10 @@ in Charm's [Bubble Tea](https://github.com/charmbracelet/bubbletea) framework.
 
 ## Usage
 
-`NewReader` returns a reader with a `Cancel` function. If the input reader is an
-`*os.File`, the cancel function can be used to interrupt a blocking `Read` call.
+`NewReader` returns a reader with a `Cancel` function. If the input reader is a
+`File`, the cancel function can be used to interrupt a blocking `Read` call.
 In this case, the cancel function returns true if the call was canceled
-successfully. If the input reader is not an `*os.File`, the cancel function does
+successfully. If the input reader is not a `File`, the cancel function does
 nothing and always returns false.
 
 ```go
