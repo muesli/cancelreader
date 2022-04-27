@@ -61,4 +61,4 @@ for {
 
 The Windows implementation is based on WaitForMultipleObject with overlapping
 reads from CONIN$. At this point it only supports canceling reads from
-`os.Stdin`.
+`os.Stdin` when stdin has not been redirected from a pipe.
