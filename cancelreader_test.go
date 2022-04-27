@@ -36,7 +36,10 @@ func TestRedirectedStdin(t *testing.T) {
 	if err != nil {
 		t.Fatal("cmd.Start():", err)
 	}
-	fmt.Fprintln(writer, testStr)
+	_, err = fmt.Fprintln(writer, testStr)
+	if err != nil {
+		t.Fatal("fmt.Fprintln():", err)
+	}
 	err = cmd.Wait()
 	if err != nil {
 		// Will fail if child process returns nonzero
