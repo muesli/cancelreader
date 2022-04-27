@@ -22,7 +22,7 @@ func TestReaderNonFile(t *testing.T) {
 	}
 }
 
-// Test that a redirected stdin still works when opened with NewReader().
+// Test that a redirected stdin still works when opened with NewReader()
 func TestRedirectedStdin(t *testing.T) {
 	cmd := exec.Command(os.Args[0])
 	cmd.Env = []string{"GO_TEST_MODE=reader"}
