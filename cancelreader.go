@@ -50,7 +50,17 @@ func (r *fallbackCancelReader) Read(data []byte) (int, error) {
 		return 0, ErrCanceled
 	}
 
-	return r.r.Read(data)
+	n, err := r.r.Read(data)
+	/*
+		If the underlying reader is a blocking reader (e.g. an open connection),
+		it might happen that 1 goroutine cancels the reader while its stuck in
+		the read call waiting for something.
+		If that happens, we should still cancel the read.
+	*/
+	if r.canceled {
+		return 0, ErrCanceled
+	}
+	return n, err
 }
 
 func (r *fallbackCancelReader) Cancel() bool {
