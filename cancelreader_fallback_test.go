@@ -6,12 +6,12 @@ import (
 	"io/ioutil"
 	"sync"
 	"testing"
-	"time"
 )
 
 type blockingReader struct {
 	sync.Mutex
-	read bool
+	read      bool
+	unblockCh chan bool
 }
 
 func (r *blockingReader) Read([]byte) (int, error) {
@@ -20,12 +20,15 @@ func (r *blockingReader) Read([]byte) (int, error) {
 		defer r.Unlock()
 		r.read = true
 	}()
-	time.Sleep(time.Millisecond * 100)
+	<-r.unblockCh
 	return 0, fmt.Errorf("this error should be ignored")
 }
 
 func TestFallbackReaderConcurrentCancel(t *testing.T) {
-	r := blockingReader{}
+	unblockCh := make(chan bool, 1)
+	r := blockingReader{
+		unblockCh: unblockCh,
+	}
 	cr, err := newFallbackCancelReader(&r)
 	if err != nil {
 		t.Errorf("expected no error, but got %s", err)
@@ -35,16 +38,18 @@ func TestFallbackReaderConcurrentCancel(t *testing.T) {
 	startedCh := make(chan bool, 1)
 	go func() {
 		startedCh <- true
+		defer func() {
+			doneCh <- true
+		}()
 		if _, err := ioutil.ReadAll(cr); err != ErrCanceled {
 			t.Errorf("expected canceled error, got %v", err)
 		}
-
-		doneCh <- true
 	}()
 
 	// make sure the read started before canceling the reader
 	<-startedCh
 	cr.Cancel()
+	unblockCh <- true
 
 	// wait for the read to end to ensure its assertions were made
 	<-doneCh
