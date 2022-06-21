@@ -3,7 +3,7 @@ package cancelreader
 import (
 	"bytes"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"sync"
 	"testing"
 	"time"
@@ -35,7 +35,7 @@ func TestFallbackReaderConcurrentCancel(t *testing.T) {
 	startedCh := make(chan bool, 1)
 	go func() {
 		startedCh <- true
-		if _, err := io.ReadAll(cr); err != ErrCanceled {
+		if _, err := ioutil.ReadAll(cr); err != ErrCanceled {
 			t.Errorf("expected canceled error, got %v", err)
 		}
 
@@ -64,7 +64,7 @@ func TestFallbackReader(t *testing.T) {
 
 	txt := "first"
 	_, _ = r.WriteString(txt)
-	first, err := io.ReadAll(cr)
+	first, err := ioutil.ReadAll(cr)
 	if err != nil {
 		t.Errorf("expected no error, but got %s", err)
 	}
@@ -73,7 +73,7 @@ func TestFallbackReader(t *testing.T) {
 	}
 
 	cr.Cancel()
-	second, err := io.ReadAll(cr)
+	second, err := ioutil.ReadAll(cr)
 	if err != ErrCanceled {
 		t.Errorf("expected ErrCanceled, got %v", err)
 	}
