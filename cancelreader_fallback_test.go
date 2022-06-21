@@ -26,7 +26,7 @@ func (r *blockingReader) Read([]byte) (int, error) {
 
 func TestFallbackReaderConcurrentCancel(t *testing.T) {
 	r := blockingReader{}
-	cr, err := NewReader(&r)
+	cr, err := newFallbackCancelReader(&r)
 	if err != nil {
 		t.Errorf("expected no error, but got %s", err)
 	}
@@ -57,7 +57,7 @@ func TestFallbackReaderConcurrentCancel(t *testing.T) {
 
 func TestFallbackReader(t *testing.T) {
 	var r bytes.Buffer
-	cr, err := NewReader(&r)
+	cr, err := newFallbackCancelReader(&r)
 	if err != nil {
 		t.Errorf("expected no error, but got %s", err)
 	}
