@@ -78,6 +78,6 @@ func TestFallbackReader(t *testing.T) {
 		t.Errorf("expected ErrCanceled, got %v", err)
 	}
 	if len(second) > 0 {
-		t.Errorf("expected and empty read, got %q", string(second))
+		t.Errorf("expected an empty read, got %q", string(second))
 	}
 }
