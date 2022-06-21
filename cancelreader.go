@@ -60,7 +60,7 @@ func (r *fallbackCancelReader) Read(data []byte) (int, error) {
 	if r.isCanceled() {
 		return 0, ErrCanceled
 	}
-	return n, err
+	return n, err // nolint: wrapcheck
 }
 
 func (r *fallbackCancelReader) Cancel() bool {
