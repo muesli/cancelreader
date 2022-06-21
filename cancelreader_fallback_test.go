@@ -12,6 +12,7 @@ type blockingReader struct {
 	sync.Mutex
 	read      bool
 	unblockCh chan bool
+	startedCh chan bool
 }
 
 func (r *blockingReader) Read([]byte) (int, error) {
@@ -20,13 +21,17 @@ func (r *blockingReader) Read([]byte) (int, error) {
 		defer r.Unlock()
 		r.read = true
 	}()
+	r.startedCh <- true
 	<-r.unblockCh
 	return 0, fmt.Errorf("this error should be ignored")
 }
 
 func TestFallbackReaderConcurrentCancel(t *testing.T) {
+	doneCh := make(chan bool, 1)
+	startedCh := make(chan bool, 1)
 	unblockCh := make(chan bool, 1)
 	r := blockingReader{
+		startedCh: startedCh,
 		unblockCh: unblockCh,
 	}
 	cr, err := newFallbackCancelReader(&r)
@@ -34,13 +39,8 @@ func TestFallbackReaderConcurrentCancel(t *testing.T) {
 		t.Errorf("expected no error, but got %s", err)
 	}
 
-	doneCh := make(chan bool, 1)
-	startedCh := make(chan bool, 1)
 	go func() {
-		startedCh <- true
-		defer func() {
-			doneCh <- true
-		}()
+		defer func() { doneCh <- true }()
 		if _, err := ioutil.ReadAll(cr); err != ErrCanceled {
 			t.Errorf("expected canceled error, got %v", err)
 		}
