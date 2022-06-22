@@ -42,7 +42,7 @@ func NewReader(reader io.Reader) (CancelReader, error) {
 
 	r.cancelSignalReader, r.cancelSignalWriter, err = os.Pipe()
 	if err != nil {
-		unix.Close(kQueue)
+		_ = unix.Close(kQueue)
 		return nil, err
 	}
 

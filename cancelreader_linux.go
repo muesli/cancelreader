@@ -37,7 +37,7 @@ func NewReader(reader io.Reader) (CancelReader, error) {
 
 	r.cancelSignalReader, r.cancelSignalWriter, err = os.Pipe()
 	if err != nil {
-		unix.Close(epoll)
+		_ = unix.Close(epoll)
 		return nil, err
 	}
 
@@ -46,7 +46,7 @@ func NewReader(reader io.Reader) (CancelReader, error) {
 		Fd:     int32(file.Fd()),
 	})
 	if err != nil {
-		unix.Close(epoll)
+		_ = unix.Close(epoll)
 		return nil, fmt.Errorf("add reader to epoll interrest list")
 	}
 
@@ -55,7 +55,7 @@ func NewReader(reader io.Reader) (CancelReader, error) {
 		Fd:     int32(r.cancelSignalReader.Fd()),
 	})
 	if err != nil {
-		unix.Close(epoll)
+		_ = unix.Close(epoll)
 		return nil, fmt.Errorf("add reader to epoll interrest list")
 	}
 
