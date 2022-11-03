@@ -91,9 +91,9 @@ func (r *winCancelReader) Read(data []byte) (int, error) {
 }
 
 // Cancel cancels ongoing and future Read() calls and returns true if the
-// cancelation of the ongoing Read() was successful. On Windows Terminal,
+// cancellation of the ongoing Read() was successful. On Windows Terminal,
 // WaitForMultipleObjects sometimes immediately returns without input being
-// available. In this case, graceful cancelation is not possible and Cancel()
+// available. In this case, graceful cancellation is not possible and Cancel()
 // returns false.
 func (r *winCancelReader) Cancel() bool {
 	r.setCanceled()
