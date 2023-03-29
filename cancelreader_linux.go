@@ -25,6 +25,10 @@ func NewReader(reader io.Reader) (CancelReader, error) {
 		return newFallbackCancelReader(reader)
 	}
 
+	if int(file.Fd()) == -1 {
+		return nil, fmt.Errorf("file is closed")
+	}
+
 	epoll, err := unix.EpollCreate1(0)
 	if err != nil {
 		return nil, fmt.Errorf("create epoll: %w", err)
@@ -47,7 +51,8 @@ func NewReader(reader io.Reader) (CancelReader, error) {
 	})
 	if err != nil {
 		_ = unix.Close(epoll)
-		return nil, fmt.Errorf("add reader to epoll interest list")
+		return nil, fmt.Errorf("add reader with descriptor %d to epoll interest list: %w",
+			int(file.Fd()), err)
 	}
 
 	err = unix.EpollCtl(epoll, unix.EPOLL_CTL_ADD, int(r.cancelSignalReader.Fd()), &unix.EpollEvent{
@@ -56,7 +61,8 @@ func NewReader(reader io.Reader) (CancelReader, error) {
 	})
 	if err != nil {
 		_ = unix.Close(epoll)
-		return nil, fmt.Errorf("add reader to epoll interest list")
+		return nil, fmt.Errorf("add cancel signal with descriptor %d to epoll interest list: %w",
+			int(r.cancelSignalReader.Fd()), err)
 	}
 
 	return r, nil
