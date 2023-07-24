@@ -199,8 +199,8 @@ func prepareConsole(input windows.Handle) (reset func() error, err error) {
 	newMode &^= windows.ENABLE_LINE_INPUT
 	newMode &^= windows.ENABLE_MOUSE_INPUT
 	newMode &^= windows.ENABLE_WINDOW_INPUT
-	newMode &^= windows.ENABLE_PROCESSED_INPUT
 
+	newMode |= windows.ENABLE_PROCESSED_INPUT
 	newMode |= windows.ENABLE_EXTENDED_FLAGS
 	newMode |= windows.ENABLE_INSERT_MODE
 	newMode |= windows.ENABLE_QUICK_EDIT_MODE
