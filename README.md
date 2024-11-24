@@ -1,10 +1,10 @@
 # CancelReader
 
-[![Latest Release](https://img.shields.io/github/release/muesli/cancelreader.svg?style=for-the-badge)](https://github.com/muesli/cancelreader/releases)
-[![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=for-the-badge)](https://pkg.go.dev/github.com/muesli/cancelreader)
+[![Latest Release](https://img.shields.io/github/release/abakum/cancelreader.svg?style=for-the-badge)](https://github.com/abakum/cancelreader/releases)
+[![Go Doc](https://img.shields.io/badge/godoc-reference-blue.svg?style=for-the-badge)](https://pkg.go.dev/github.com/abakum/cancelreader)
 [![Software License](https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge)](/LICENSE)
-[![Build Status](https://img.shields.io/github/workflow/status/muesli/cancelreader/build?style=for-the-badge)](https://github.com/muesli/cancelreader/actions)
-[![Go ReportCard](https://goreportcard.com/badge/github.com/muesli/cancelreader?style=for-the-badge)](https://goreportcard.com/report/muesli/cancelreader)
+[![Build Status](https://img.shields.io/github/workflow/status/abakum/cancelreader/build?style=for-the-badge)](https://github.com/abakum/cancelreader/actions)
+[![Go ReportCard](https://goreportcard.com/badge/github.com/abakum/cancelreader?style=for-the-badge)](https://goreportcard.com/report/abakum/cancelreader)
 
 A cancelable reader for Go
 

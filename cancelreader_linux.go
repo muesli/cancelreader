@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 
 	"golang.org/x/sys/unix"
 )
@@ -101,30 +100,27 @@ func (r *epollCancelReader) Cancel() bool {
 }
 
 func (r *epollCancelReader) Close() error {
-	var errMsgs []string
+	var e1, e2, e3 error
 
 	// close kqueue
 	err := unix.Close(r.epoll)
 	if err != nil {
-		errMsgs = append(errMsgs, fmt.Sprintf("closing epoll: %v", err))
+		e1 = fmt.Errorf("closing epoll: %w", err)
 	}
 
 	// close pipe
 	err = r.cancelSignalWriter.Close()
 	if err != nil {
-		errMsgs = append(errMsgs, fmt.Sprintf("closing cancel signal writer: %v", err))
+		e2 = fmt.Errorf("closing cancel signal writer: %w", err)
 	}
 
 	err = r.cancelSignalReader.Close()
 	if err != nil {
-		errMsgs = append(errMsgs, fmt.Sprintf("closing cancel signal reader: %v", err))
+		e3 = fmt.Errorf("closing cancel signal reader: %w", err)
 	}
 
-	if len(errMsgs) > 0 {
-		return fmt.Errorf(strings.Join(errMsgs, ", "))
-	}
+	return errors.Join(e1, e2, e3)
 
-	return nil
 }
 
 func (r *epollCancelReader) wait() error {

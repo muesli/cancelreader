@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 
 	"golang.org/x/sys/unix"
 )
@@ -81,24 +80,20 @@ func (r *selectCancelReader) Cancel() bool {
 }
 
 func (r *selectCancelReader) Close() error {
-	var errMsgs []string
+	var e1, e2 error
 
 	// close pipe
 	err := r.cancelSignalWriter.Close()
 	if err != nil {
-		errMsgs = append(errMsgs, fmt.Sprintf("closing cancel signal writer: %v", err))
+		e1 = fmt.Errorf("closing cancel signal writer: %w", err)
 	}
 
 	err = r.cancelSignalReader.Close()
 	if err != nil {
-		errMsgs = append(errMsgs, fmt.Sprintf("closing cancel signal reader: %v", err))
+		e2 = fmt.Errorf("closing cancel signal reader: %w", err)
 	}
 
-	if len(errMsgs) > 0 {
-		return fmt.Errorf(strings.Join(errMsgs, ", "))
-	}
-
-	return nil
+	return errors.Join(e1, e2)
 }
 
 func waitForRead(reader, abort File) error {
