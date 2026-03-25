@@ -30,7 +30,7 @@ type File interface {
 }
 
 // fallbackCancelReader implements cancelReader but does not actually support
-// cancelation during an ongoing Read() call. Thus, Cancel() always returns
+// cancellation during an ongoing Read() call. Thus, Cancel() always returns
 // false. However, after calling Cancel(), new Read() calls immediately return
 // errCanceled and don't consume any data anymore.
 type fallbackCancelReader struct {
@@ -72,7 +72,7 @@ func (r *fallbackCancelReader) Close() error {
 	return nil
 }
 
-// cancelMixin represents a goroutine-safe cancelation status.
+// cancelMixin represents a goroutine-safe cancellation status.
 type cancelMixin struct {
 	unsafeCanceled bool
 	lock           sync.Mutex
