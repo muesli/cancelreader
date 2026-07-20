@@ -47,6 +47,8 @@ func NewReader(reader io.Reader) (CancelReader, error) {
 	})
 	if err != nil {
 		_ = unix.Close(epoll)
+		_ = r.cancelSignalReader.Close()
+		_ = r.cancelSignalWriter.Close()
 		return nil, fmt.Errorf("add reader to epoll interest list")
 	}
 
@@ -56,6 +58,8 @@ func NewReader(reader io.Reader) (CancelReader, error) {
 	})
 	if err != nil {
 		_ = unix.Close(epoll)
+		_ = r.cancelSignalReader.Close()
+		_ = r.cancelSignalWriter.Close()
 		return nil, fmt.Errorf("add reader to epoll interest list")
 	}
 
