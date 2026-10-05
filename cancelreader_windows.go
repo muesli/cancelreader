@@ -164,6 +164,7 @@ func (r *winCancelReader) readAsync(data []byte) (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("create event: %w", err)
 	}
+	defer windows.CloseHandle(hevent)
 
 	overlapped := windows.Overlapped{
 		HEvent: hevent,
@@ -177,11 +178,11 @@ func (r *winCancelReader) readAsync(data []byte) (int, error) {
 	}
 
 	r.blockingReadSignal <- struct{}{}
+	defer func() { <-r.blockingReadSignal }()
 	err = windows.GetOverlappedResult(r.conin, &overlapped, &n, true)
 	if err != nil {
-		return int(n), nil
+		return int(n), err
 	}
-	<-r.blockingReadSignal
 
 	return int(n), nil
 }
