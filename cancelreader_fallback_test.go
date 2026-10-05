@@ -15,6 +15,47 @@ type blockingReader struct {
 	startedCh chan bool
 }
 
+type readerFunc func([]byte) (int, error)
+
+func (f readerFunc) Read(p []byte) (int, error) { return f(p) }
+
+func TestFallbackReaderCancelPreservesConsumedBytes(t *testing.T) {
+	started := make(chan struct{})
+	unblock := make(chan struct{})
+	underlying := readerFunc(func(p []byte) (int, error) {
+		close(started)
+		<-unblock
+		return copy(p, "abc"), nil
+	})
+	r, err := NewReader(underlying)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer r.Close()
+	type result struct {
+		n   int
+		err error
+	}
+	done := make(chan result, 1)
+	buf := make([]byte, 3)
+	go func() {
+		n, err := r.Read(buf)
+		done <- result{n, err}
+	}()
+	<-started
+	if r.Cancel() {
+		t.Error("fallback cancellation should return false")
+	}
+	close(unblock)
+	got := <-done
+	if got.n != 3 || got.err != ErrCanceled || string(buf[:got.n]) != "abc" {
+		t.Fatalf("Read = (%d, %v), data %q; want (3, ErrCanceled), abc", got.n, got.err, buf[:got.n])
+	}
+	if n, err := r.Read(buf); n != 0 || err != ErrCanceled {
+		t.Fatalf("read after cancellation = (%d, %v); want (0, ErrCanceled)", n, err)
+	}
+}
+
 func (r *blockingReader) Read([]byte) (int, error) {
 	defer func() {
 		r.Lock()

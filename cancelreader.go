@@ -58,7 +58,7 @@ func (r *fallbackCancelReader) Read(data []byte) (int, error) {
 		If that happens, we should still cancel the read.
 	*/
 	if r.isCanceled() {
-		return 0, ErrCanceled
+		return n, ErrCanceled
 	}
 	return n, err // nolint: wrapcheck
 }
