@@ -35,22 +35,30 @@ func NewReader(reader io.Reader) (CancelReader, error) {
 		epoll: epoll,
 	}
 
+	err = epollCtl(epoll, unix.EPOLL_CTL_ADD, int(file.Fd()), &unix.EpollEvent{
+		Events: unix.EPOLLIN,
+		Fd:     int32(file.Fd()),
+	})
+	if errors.Is(err, unix.EPERM) {
+		// The fd does not support epoll; /dev/null is the common case (a
+		// character device with no poll table). Fall back to the
+		// non-canceling reader, which is harmless for a source that never
+		// delivers data.
+		_ = unix.Close(epoll)
+		return newFallbackCancelReader(reader)
+	}
+	if err != nil {
+		_ = unix.Close(epoll)
+		return nil, fmt.Errorf("add reader to epoll interest list")
+	}
+
 	r.cancelSignalReader, r.cancelSignalWriter, err = os.Pipe()
 	if err != nil {
 		_ = unix.Close(epoll)
 		return nil, err
 	}
 
-	err = unix.EpollCtl(epoll, unix.EPOLL_CTL_ADD, int(file.Fd()), &unix.EpollEvent{
-		Events: unix.EPOLLIN,
-		Fd:     int32(file.Fd()),
-	})
-	if err != nil {
-		_ = unix.Close(epoll)
-		return nil, fmt.Errorf("add reader to epoll interest list")
-	}
-
-	err = unix.EpollCtl(epoll, unix.EPOLL_CTL_ADD, int(r.cancelSignalReader.Fd()), &unix.EpollEvent{
+	err = epollCtl(epoll, unix.EPOLL_CTL_ADD, int(r.cancelSignalReader.Fd()), &unix.EpollEvent{
 		Events: unix.EPOLLIN,
 		Fd:     int32(r.cancelSignalReader.Fd()),
 	})
@@ -60,6 +68,20 @@ func NewReader(reader io.Reader) (CancelReader, error) {
 	}
 
 	return r, nil
+}
+
+// epollCtl retries EpollCtl while the kernel reports EINTR. A caught signal
+// can interrupt the registration of an interest-list entry, and the
+// interrupted call must be retried rather than reported as a failure.
+// EpollWait already retries its own interruptions.
+func epollCtl(epoll, op, fd int, event *unix.EpollEvent) error {
+	for {
+		err := unix.EpollCtl(epoll, op, fd, event)
+		if errors.Is(err, unix.EINTR) {
+			continue
+		}
+		return err
+	}
 }
 
 type epollCancelReader struct {
